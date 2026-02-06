@@ -1,0 +1,32 @@
+name: 抓取游戏活动
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: 设置Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: 安装依赖
+        run: npm install axios cheerio
+      
+      - name: 抓取活动
+        run: node fetch.js
+      
+      - name: 提交数据
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add activities.json || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "更新活动数据 $(date)"
